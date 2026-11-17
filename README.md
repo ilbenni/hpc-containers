@@ -68,6 +68,9 @@ Build in locale (serve docker):
 ci/build.sh blender            # build + test, nessun push
 ```
 
+Dependabot (`.github/dependabot.yml`) controlla ogni lunedì le versioni delle action e delle
+immagini base e apre una PR quando c'è un aggiornamento.
+
 Se cambia la pipeline (`ci/` o il workflow) vengono ricostruite tutte le immagini.
 
 ## Struttura

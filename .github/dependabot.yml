@@ -1,0 +1,22 @@
+# Aggiornamenti automatici: Dependabot apre una PR, la CI la costruisce e testa,
+# poi si decide se fare merge.
+version: 2
+updates:
+  # Versioni delle action usate nei workflow (es. actions/checkout)
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "deps(actions)"
+
+  # Immagini base nei Dockerfile (es. debian:trixie-slim)
+  - package-ecosystem: docker
+    directories:
+      - /images/*
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "deps(docker)"
