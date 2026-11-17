@@ -27,7 +27,7 @@ jobs:
     outputs:
       images: ${{ steps.list.outputs.images }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -61,7 +61,7 @@ jobs:
       BUILD_NUMBER: ${{ github.run_number }}
       SOURCE_URL: ${{ github.server_url }}/${{ github.repository }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - name: Build e test (PR, senza push)
         if: github.event_name == 'pull_request'
