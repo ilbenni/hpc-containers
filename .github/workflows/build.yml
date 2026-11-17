@@ -1,0 +1,89 @@
+name: build-images
+
+on:
+  push:
+    branches: [main]
+    paths: ['images/**', 'ci/**', '.github/workflows/build.yml']
+  pull_request:
+    paths: ['images/**', 'ci/**', '.github/workflows/build.yml']
+  workflow_dispatch:
+    inputs:
+      image:
+        description: "Immagine da ricostruire (nome della cartella in images/) oppure 'all'"
+        required: true
+        default: all
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  detect:
+    runs-on: ubuntu-24.04
+    outputs:
+      images: ${{ steps.list.outputs.images }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: list
+        env:
+          EVENT: ${{ github.event_name }}
+          INPUT_IMAGE: ${{ inputs.image }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+        run: |
+          case "$EVENT" in
+            workflow_dispatch)
+              if [ "$INPUT_IMAGE" = "all" ]; then IMAGES=$(ci/changed-images.sh all)
+              else IMAGES=$(printf '["%s"]' "$INPUT_IMAGE"); fi ;;
+            pull_request) IMAGES=$(ci/changed-images.sh "$PR_BASE") ;;
+            *)            IMAGES=$(ci/changed-images.sh "$PUSH_BEFORE") ;;
+          esac
+          echo "images=$IMAGES" >> "$GITHUB_OUTPUT"
+          echo "Immagini: $IMAGES"
+
+  build:
+    needs: detect
+    if: needs.detect.outputs.images != '[]'
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJSON(needs.detect.outputs.images) }}
+    env:
+      REGISTRY: ghcr.io/${{ github.repository_owner }}
+      BUILD_NUMBER: ${{ github.run_number }}
+      SOURCE_URL: ${{ github.server_url }}/${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build e test (PR, senza push)
+        if: github.event_name == 'pull_request'
+        run: ci/build.sh "${{ matrix.image }}"
+
+      - name: Installa Apptainer
+        if: github.event_name != 'pull_request'
+        run: |
+          sudo add-apt-repository -y ppa:apptainer/ppa
+          sudo apt-get update
+          sudo apt-get install -y apptainer
+          apptainer --version
+
+      - name: Login a GHCR (docker + apptainer)
+        if: github.event_name != 'pull_request'
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          echo "$TOKEN" | docker login ghcr.io -u "$ACTOR" --password-stdin
+          echo "$TOKEN" | apptainer registry login -u "$ACTOR" --password-stdin oras://ghcr.io
+
+      - name: Build, test e push (OCI + SIF)
+        if: github.event_name != 'pull_request'
+        run: ci/build.sh "${{ matrix.image }}" --push
