@@ -15,6 +15,9 @@ all_images() {
 
 if [[ "${BASE}" == "all" || "${BASE}" =~ ^0+$ ]] || ! git cat-file -e "${BASE}^{commit}" 2>/dev/null; then
   LIST="$(all_images)"
+elif git diff --name-only "${BASE}" "${HEAD}" -- ci/ .github/workflows/ | grep -q .; then
+  # cambiata la pipeline: si ricostruisce tutto per verificarla
+  LIST="$(all_images)"
 else
   LIST="$(git diff --name-only "${BASE}" "${HEAD}" -- images/ \
           | awk -F/ 'NF>=3 {print $2}' | sort -u \

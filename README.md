@@ -68,6 +68,8 @@ Build in locale (serve docker):
 ci/build.sh blender            # build + test, nessun push
 ```
 
+Se cambia la pipeline (`ci/` o il workflow) vengono ricostruite tutte le immagini.
+
 ## Struttura
 
 ```
