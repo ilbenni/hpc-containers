@@ -17,17 +17,17 @@ Sui nodi del cluster serve solo Apptainer.
 
 ## Tag
 
-- `<versione>-<build>` (es. `5.2.0-7`): **immutabile**, da usare per riproducibilità.
-- `<versione>` (es. `5.2.0`): punta all'ultima build di quella versione.
+- `<versione>-<build>` (es. `5.2.2-7`): **immutabile**, da usare per riproducibilità.
+- `<versione>` (es. `5.2.2`): punta all'ultima build di quella versione.
 
 ## Uso sul cluster
 
 ```bash
 # SIF già pronto
-apptainer pull blender.sif oras://ghcr.io/ilbenni/blender-sif:5.2.0
+apptainer pull blender.sif oras://ghcr.io/ilbenni/blender-sif:5.2.2
 
 # oppure dall'immagine OCI (Apptainer la converte)
-apptainer pull blender.sif docker://ghcr.io/ilbenni/blender:5.2.0
+apptainer pull blender.sif docker://ghcr.io/ilbenni/blender:5.2.2
 
 # con GPU NVIDIA: --nv monta nel container il driver dell'host
 apptainer exec --nv blender.sif blender -b --version
@@ -53,7 +53,7 @@ Ogni immagine è una cartella in `images/`:
 ```
 images/<nome>/
   Dockerfile   # riceve --build-arg VERSION
-  VERSION      # una riga, es. 5.2.0
+  VERSION      # una riga, es. 5.2.2
   test.sh      # opzionale: smoke test eseguito dentro il container
 ```
 

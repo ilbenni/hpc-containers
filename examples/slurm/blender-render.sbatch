@@ -15,7 +15,7 @@
 set -euo pipefail
 
 BLEND="${1:?uso: sbatch --array=A-B blender-render.sbatch file.blend}"
-SIF="${BLENDER_SIF:-/software/containers/blender/blender-5.2.0.sif}"
+SIF="${BLENDER_SIF:-/software/containers/blender/blender-5.2.2.sif}"
 OUTDIR="${OUTDIR:-$PWD/render}"
 mkdir -p "$OUTDIR" logs
 
