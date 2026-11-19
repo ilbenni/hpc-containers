@@ -74,6 +74,8 @@ jobs:
         run: |
           # .deb ufficiale dalle release GitHub di Apptainer (più affidabile del PPA)
           gh release download -R apptainer/apptainer --pattern 'apptainer_*_amd64.deb' -D /tmp/apptainer
+          # i mirror Ubuntu ogni tanto rispondono 503: ritenta invece di fallire
+          echo 'Acquire::Retries "5";' | sudo tee /etc/apt/apt.conf.d/80-retries
           sudo apt-get update
           sudo apt-get install -y /tmp/apptainer/apptainer_*_amd64.deb
           apptainer --version
